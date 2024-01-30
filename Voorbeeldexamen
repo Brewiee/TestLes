@@ -14,8 +14,8 @@ def lees_muziekdata_csv():
     return muzikanten
 
 def toon_muzikanten(muzikanten):
-    for artiest in muzikanten.keys():
-        print(f"{artiest}")
+    for artiest, gegevens in muzikanten.items():
+        print(f"{artiest}, {gegevens['instrument']}, {gegevens['uurprijs']}")
 
 def toon_muzikanten_van_genre(muzikanten, genre):
     gevonden_muzikanten = [artiest for artiest, gegevens in muzikanten.items() if
