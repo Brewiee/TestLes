@@ -1,0 +1,171 @@
+import csv
+
+def lees_muziekdata_csv():
+    muzikanten = {}
+    with open('Muziekdata.csv', newline='', encoding='utf-8') as csvfile:
+        lezer = csv.DictReader(csvfile)
+        for rij in lezer:
+            artiestennaam = rij['artiestennaam']
+            muzikanten[artiestennaam] = {
+                'genre': rij['genre'],
+                'instrument': rij['instrument'],
+                'uurprijs': float(rij['uurprijs'])
+            }
+    return muzikanten
+
+def toon_muzikanten(muzikanten):
+    for artiest in muzikanten.keys():
+        print(f"{artiest}")
+
+def toon_muzikanten_van_genre(muzikanten, genre):
+    gevonden_muzikanten = [artiest for artiest, gegevens in muzikanten.items() if
+                           gegevens['genre'].lower() == genre.lower()]
+
+    if gevonden_muzikanten:
+        for artiest in gevonden_muzikanten:
+            print(f"{artiest}")
+    else:
+        print(f"Geen muzikanten gevonden met het genre {genre}.")
+
+def toon_muzikanten_met_instrument(muzikanten, instrument):
+    gevonden_muzikanten = [artiest for artiest, gegevens in muzikanten.items() if gegevens['instrument'].lower() == instrument.lower()]
+
+    if gevonden_muzikanten:
+        for artiest in gevonden_muzikanten:
+            print(f"{artiest}")
+    else:
+        print(f"Geen muzikanten gevonden met het instrument {instrument}.")
+
+def sorteer_op_kostprijs(muzikanten):
+    gesorteerd = sorted(muzikanten.items(), key=lambda x: x[1]['uurprijs'], reverse=True)
+    for artiest, gegevens in gesorteerd:
+        print(
+            f"{artiest}, Uurprijs: {gegevens['uurprijs']}")
+
+def bereken_kostprijs(muzikanten, artiest, aantal_uur):
+    artiest_lowercase = artiest.lower()
+    gevonden_muzikant = next((gegevens for artiest, gegevens in muzikanten.items() if artiest.lower() == artiest_lowercase), None)
+    if gevonden_muzikant:
+        return gevonden_muzikant['uurprijs'] * aantal_uur
+    else:
+        return None
+
+def voeg_muzikanten_toe(muzikanten, aantal):
+    for _ in range(aantal):
+        artiestennaam = input("Voer de artiestennaam in: ")
+        genre = input("Voer het genre in: ")
+        instrument = input("Voer het instrument in: ")
+        uurprijs = float(input("Voer de uurprijs in: "))
+        muzikanten[artiestennaam] = {'genre': genre, 'instrument': instrument, 'uurprijs': uurprijs}
+    return muzikanten
+
+def verwijder_muzikant(muzikanten, artiestennaam):
+    artiestennaam_lowercase = artiestennaam.lower()
+    gevonden_artiest = next((artiest for artiest in muzikanten if artiest.lower() == artiestennaam_lowercase), None)
+    if gevonden_artiest:
+        del muzikanten[gevonden_artiest]
+        print(f"{gevonden_artiest} is verwijderd.")
+    else:
+        print(f"{artiestennaam} niet gevonden.")
+
+def verander_instrument(muzikanten, artiestennaam, nieuw_instrument):
+    artiestennaam_lowercase = artiestennaam.lower()
+    gevonden_artiest = next((artiest for artiest in muzikanten if artiest.lower() == artiestennaam_lowercase), None)
+    if gevonden_artiest:
+        muzikanten[gevonden_artiest]['instrument'] = nieuw_instrument
+        print(f"Instrument van {gevonden_artiest} is gewijzigd naar {nieuw_instrument}.")
+    else:
+        print(f"{artiestennaam} niet gevonden.")
+
+def verander_uurprijs(muzikanten, artiestennaam, nieuwe_uurprijs):
+    artiestennaam_lowercase = artiestennaam.lower()
+    gevonden_artiest = next((artiest for artiest in muzikanten if artiest.lower() == artiestennaam_lowercase), None)
+    if gevonden_artiest:
+        muzikanten[gevonden_artiest]['uurprijs'] = nieuwe_uurprijs
+        print(f"Uurprijs van {gevonden_artiest} is gewijzigd naar {nieuwe_uurprijs}.")
+    else:
+        print(f"{artiestennaam} niet gevonden.")
+
+def update_data(muzikanten):
+    with open('Muziekdata.csv', 'w', newline='', encoding='utf-8') as csvfile:
+        velden = ['artiestennaam', 'genre', 'instrument', 'uurprijs']
+        schrijver = csv.DictWriter(csvfile, fieldnames=velden)
+        schrijver.writeheader()
+        for artiest, gegevens in muzikanten.items():
+            schrijver.writerow(
+                {'artiestennaam': artiest, 'genre': gegevens['genre'], 'instrument': gegevens['instrument'],
+                 'uurprijs': gegevens['uurprijs']})
+
+if __name__ == "__main__":
+    muzikanten = lees_muziekdata_csv()
+
+    rol = input("Ben je een user of admin? ").lower()
+
+    if rol == 'user':
+        while True:
+            print("\n1. Toon alle muzikanten.")
+            print("2. Toon alle muzikanten van een bepaald genre.")
+            print("3. Toon alle muzikanten met een bepaald instrument.")
+            print("4. Sorteer muzikanten op kostprijs (duurste eerst).")
+            print("5. Bereken kostprijs.")
+            print("6. Exit.")
+
+            keuze = input("Voer je keuze in (1-6): ")
+
+            if keuze == '1':
+                toon_muzikanten(muzikanten)
+            elif keuze == '2':
+                genre = input("Voer het genre in: ")
+                toon_muzikanten_van_genre(muzikanten, genre)
+            elif keuze == '3':
+                instrument = input("Voer het instrument in: ")
+                toon_muzikanten_met_instrument(muzikanten, instrument)
+            elif keuze == '4':
+                sorteer_op_kostprijs(muzikanten)
+            elif keuze == '5':
+                artiest = input("Voer de artiestennaam in: ")
+                aantal_uur = float(input("Voer het aantal uur in: "))
+                kostprijs = bereken_kostprijs(muzikanten, artiest, aantal_uur)
+                if kostprijs is not None:
+                    print(f"De kostprijs voor {artiest} is: {kostprijs}")
+                else:
+                    print(f"{artiest} niet gevonden.")
+            elif keuze == '6':
+                break
+            else:
+                print("Ongeldige keuze. Probeer opnieuw.")
+
+    elif rol == 'admin':
+        while True:
+            print("\n1. Voeg muzikant(en) toe.")
+            print("2. Verwijder muzikant.")
+            print("3. Verander instrument.")
+            print("4. Verander uurprijs.")
+            print("5. Update data.")
+            print("6. Exit.")
+
+            keuze_admin = input("Voer je keuze in (1-6): ")
+
+            if keuze_admin == '1':
+                aantal_toevoegen = int(input("Hoeveel muzikanten wil je toevoegen? "))
+                muzikanten = voeg_muzikanten_toe(muzikanten, aantal_toevoegen)
+            elif keuze_admin == '2':
+                artiest_verwijderen = input("Voer de artiestennaam in die je wilt verwijderen: ")
+                verwijder_muzikant(muzikanten, artiest_verwijderen)
+            elif keuze_admin == '3':
+                artiest_verander_instrument = input(
+                    "Voer de artiestennaam in waarvan je het instrument wilt wijzigen: ")
+                nieuw_instrument = input("Voer het nieuwe instrument in: ")
+                verander_instrument(muzikanten, artiest_verander_instrument, nieuw_instrument)
+            elif keuze_admin == '4':
+                artiest_verander_uurprijs = input("Voer de artiestennaam in waarvan je de uurprijs wilt wijzigen: ")
+                nieuwe_uurprijs = float(input("Voer de nieuwe uurprijs in: "))
+                verander_uurprijs(muzikanten, artiest_verander_uurprijs, nieuwe_uurprijs)
+            elif keuze_admin == '5':
+                update_data(muzikanten)
+                print("Data succesvol bijgewerkt in de CSV.")
+            elif keuze_admin == '6':
+                break
+            else:
+                print("Ongeldige keuze. Probeer opnieuw.")
+
